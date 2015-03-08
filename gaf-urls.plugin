@@ -55,7 +55,12 @@ plugins in ~/.vim/bundle, and so on:
 
 # if the entry is a git repo, and "lite mode" is "on", add the URL instead of copying the files
 gaf_urlsave() {
-    feature=$1; shift
+    git_status_clean || die "gaf repo is not clean"
+
+    branch=$1
+    shift
+
+    in_dir $GAF_REPO git_checkout $branch -b
 
     for lfd
     do
@@ -64,9 +69,15 @@ gaf_urlsave() {
             urls_copy_url $lfd
         fi
     done
+
+    in_dir $GAF_REPO git_commit
+
+    # unlike 'gaf save', we don't update the feature list here
 }
 
 gaf_urlrestore() {
+    git_status_clean || die "gaf repo is not clean"
+
     feature=$1; shift
     in_dir $GAF_REPO git_checkout $feature
 
