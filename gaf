@@ -90,7 +90,7 @@ restore_meta() {
 # copy files to repo from 'working' copies
 
 copy_to_repo() {
-    local src=$1
+    local src="$1"
 
     # branch has already been checkedout in caller
 
@@ -99,7 +99,7 @@ copy_to_repo() {
     then
         # copy $src with full path into $dst (not just the last node).  That
         # is, copying a/b/c to d/e will result in d/e/a/b/c, not d/e/c.
-        tar -cf - --exclude .git $src | (cd $GAF_REPO; tar -xf -)
+        tar -cf - --exclude .git "$src" | (cd $GAF_REPO; tar -xf -)
         save_meta
         return
     fi
@@ -161,9 +161,9 @@ gaf_save() {
         for lfd     # list of files/dirs
         do
             lfd=${lfd%/}    # remove any trailing slash
-            [ -e $lfd ] || { warn "'$lfd' does not exist; skipping"; continue; }
+            [ -e "$lfd" ] || { warn "'$lfd' does not exist; skipping"; continue; }
 
-            copy_to_repo $lfd
+            copy_to_repo "$lfd"
         done
     fi
 
