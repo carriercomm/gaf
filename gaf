@@ -245,6 +245,8 @@ gaf_untracked() {
     shift
     for f
     do
+        # remove the one file that is sure to conflict
+        git rm .gaf-meta >&/dev/null; git commit -m remove-meta >&/dev/null
         # then merge all the others in to it
         git merge $f >&/dev/null || die "merge '$f' failed"
     done
