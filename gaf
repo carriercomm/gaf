@@ -160,18 +160,18 @@ gaf_save() {
 
     if [ -z "$1" ]  # no args
     then
-        COMMIT_MESSAGE=${COMMIT_MESSAGE:-"refresh files in repo"}
-        copy_to_repo
+        COMMIT_MESSAGE=${COMMIT_MESSAGE:-"refresh"}
+        set `$0 manifest $branch`
     else
-        COMMIT_MESSAGE=${COMMIT_MESSAGE:-"$*"}
-        for lfd     # list of files/dirs
-        do
-            lfd=${lfd%/}    # remove any trailing slash
-            [ -e "$lfd" ] || { warn "'$lfd' does not exist; skipping"; continue; }
-
-            copy_to_repo "$lfd"
-        done
+        COMMIT_MESSAGE="MANIFEST: $*"
     fi
+    for lfd     # list of files/dirs
+    do
+        lfd=${lfd%/}    # remove any trailing slash
+        [ -e "$lfd" ] || { warn "'$lfd' does not exist; skipping"; continue; }
+
+        copy_to_repo "$lfd"
+    done
 
     in_dir $GAF_REPO git_commit
     update_list "^$branch$" $branch $GAF_FLIST
@@ -237,6 +237,17 @@ gaf_diff() {
     done
     # clean things up, whatever the branch may be
     git_status_clean || in_dir $GAF_REPO git checkout -f
+}
+
+# print the MANIFEST for the given branch
+gaf_manifest() {
+    cd $GAF_REPO 2>/dev/null || die "'cd' failed; '\$GAF_REPO' not set?"
+    local b=$1 || die "gaf manifest needs feature name"
+    git log --oneline $b | perl -lne "
+        next unless  s/.*$b: MANIFEST: (.*)/\$1/;
+        s/ /\\n/g;
+        print;
+    " | sort -u
 }
 
 # this is somewhat inefficient but elegant enough that I don't care
