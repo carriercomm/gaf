@@ -64,6 +64,12 @@ update_list() {
 # TODO: orcish maneuver in 4 places below
 save_meta() {
     # called from copy_to_repo; PWD is original PWD not GAF_REPO
+
+    # first, get rid of ignored files.  No combination of 'git clean' options
+    # can remove a file that is specified inside a .gitignore file deep within
+    # an *untracked* directory; ls-files does.
+    (cd $GAF_REPO; git ls-files --exclude-standard -o -i | xargs rm -f)
+
     (cd $GAF_REPO; find . -name .git -prune -o -print ) | sort | perl -lne '
         @s = stat($_) or next;
         print "fail $_" unless @s;
