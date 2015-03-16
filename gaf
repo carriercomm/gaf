@@ -244,7 +244,7 @@ gaf_manifest() {
     cd $GAF_REPO 2>/dev/null || die "'cd' failed; '\$GAF_REPO' not set?"
     local b=$1 || die "gaf manifest needs feature name"
     git log --oneline $b | perl -lne "
-        next unless  s/.*$b: MANIFEST: (.*)/\$1/;
+        next unless s(.*$b: MANIFEST: (.*))(\$1);
         s/ /\\n/g;
         print;
     " | sort -u
