@@ -80,10 +80,12 @@ Here is the complete list, with sample usages where appropriate.
             gaf save scripts bin
 
     *   `gaf save <branch>` -- with just a branch name, recopies and
-        commits files **already known** to the branch (think "git add -u"
-        here).
+        commits files/directories that were previously explicitly named in a
+        'gaf save' command.
 
             gaf save base
+            # in this example, this is eqvt to:
+            #   gaf save base .bashrc .gitconfig .less .vimrc .vim
 
     *   `gaf save` (with no arguments) is a shortcut for running `gaf save
         <branch>` for each branch in the feature list.
@@ -154,6 +156,13 @@ Here is the complete list, with sample usages where appropriate.
     This is the only command that usurps a git command name.  If you have an
     alias for diff in your `~/.gitconfig` you can still use that as normal of
     course.
+
+*   **`gaf manifest`**
+
+    Print the sorted, cumulative, list of files and directories that were ever
+    'gaf save'd to the given feature.
+
+        gaf manifest <feature>
 
 *   **`gaf untracked`**
 
