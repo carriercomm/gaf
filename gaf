@@ -163,7 +163,7 @@ gaf_save() {
         COMMIT_MESSAGE=${COMMIT_MESSAGE:-"refresh"}
         set `$0 manifest $branch`
     else
-        COMMIT_MESSAGE="MANIFEST: $*"
+        COMMIT_MESSAGE=${COMMIT_MESSAGE:-"MANIFEST: $*"}
     fi
     for lfd     # list of files/dirs
     do
