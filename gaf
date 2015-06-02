@@ -128,6 +128,7 @@ copy_from_repo() {
 # ----------------------------------------------------------------------
 # core commands
 
+## init:create $GAF_REPO (default: ~/.gaf)
 gaf_init() {
     [ -d $GAF_REPO ] || git init $GAF_REPO
     cd $GAF_REPO
@@ -140,6 +141,7 @@ gaf_init() {
     die "some error in init; see previous messages"
 }
 
+## list:list gaf features available (mark features in flist with '*')
 gaf_list() {
     cd $GAF_REPO 2>/dev/null || die "'cd' failed; '\$GAF_REPO' not set?"
     for f in $(git for-each-ref '--format=%(refname:short)' refs/heads | sort)
@@ -150,6 +152,10 @@ gaf_list() {
     exit 0
 }
 
+## save:save feature file/dir-list...
+## save:save feature    # recopy only files known to branch
+## save:save            # save all features in flist
+## save:(uses $COMMIT_MESSAGE if set)
 gaf_save() {
     git_status_clean || die "gaf repo is not clean"
 
@@ -177,6 +183,7 @@ gaf_save() {
     update_list "^$branch$" $branch $GAF_FLIST
 }
 
+## restore:[feature]; restore named feature or all features in flist
 gaf_restore() {
     git_status_clean || die "gaf repo is not clean"
 
@@ -191,6 +198,7 @@ gaf_restore() {
     done
 }
 
+## cycle:for each remote(fetch, for each feature in flist(save, merge, restore))
 gaf_cycle() {
     git_status_clean || die "gaf repo is not clean"
 
@@ -213,6 +221,7 @@ gaf_cycle() {
     done
 }
 
+## diff:[patt] diff all features in flist or just those matching pattern
 gaf_diff() {
     git_status_clean || die "gaf repo is not clean"
 
@@ -239,17 +248,39 @@ gaf_diff() {
     git_status_clean || in_dir $GAF_REPO git checkout -f
 }
 
-# print the MANIFEST for the given branch
+## remove:feature file/dir...
+gaf_remove() {
+    git_status_clean || die "gaf repo is not clean"
+
+    branch=$1
+    shift
+
+    [ -z "$1" ] && die "need file/dir list to remove"
+
+    in_dir $GAF_REPO git_checkout $branch || die "checkout '$branch' failed"
+    in_dir $GAF_REPO git rm -rf "$@"      || die "git rm -rf failed"
+    COMMIT_MESSAGE="MANIFEST- $*"
+    in_dir $GAF_REPO git_commit
+
+    # clean things up, whatever the branch may be
+    git_status_clean || in_dir $GAF_REPO git checkout -f
+}
+
+## manifest:manifest feature; print the manifest
 gaf_manifest() {
     cd $GAF_REPO 2>/dev/null || die "'cd' failed; '\$GAF_REPO' not set?"
     local b=$1 || die "gaf manifest needs feature name"
-    git log --oneline $b | perl -lne "
-        next unless s(.*$b: MANIFEST: (.*))(\$1);
-        s/ /\\n/g;
-        print;
-    " | sort -u
+    git log --oneline $b | tac | grep -o "$b: MANIFEST. .*" | perl -lane '
+        shift @F; if (shift(@F) eq "MANIFEST-") {
+            map { delete $s{$_} } @F
+        } else {
+            map { $s{$_} = 1 } @F
+        }
+        END { map { print } sort keys %s; }
+    '
 }
 
+## untracked:[feature]; find untracked files (somewhat inefficient)
 # this is somewhat inefficient but elegant enough that I don't care
 gaf_untracked() {
     local od=$PWD; cd $GAF_REPO
@@ -279,16 +310,8 @@ gaf_help() {
     cat <<EOF
 gaf -- gitify arbitrary files
 
-This is just a quick refresh of the most common commands; please see
+Run "gaf _commands" or use zsh completion to get help.  See
 http://gitolite.com/gaf for more features and details.
-
-    gaf init            # ~/.gaf or \$GAF_REPO
-    gaf save <branch> <list of files/dirs...>
-    gaf save <branch>   # recopy only files known to branch (like 'git add -u')
-    gaf restore <branch>
-    gaf cycle
-    gaf find <pattern>  # find what branch has files matching pattern
-    gaf <any git command or alias> <args>       # will run in gaf repo dir
 
 EOF
 echo -n "$GAF_PLUGIN_HELP"
@@ -297,6 +320,7 @@ echo -n "$GAF_PLUGIN_HELP"
 
 # ----------------------------------------------------------------------
 # extra commands
+## find:pattern; find which feature contains matching filenames
 gaf_find() {
     cd $GAF_REPO
     patt=$1; shift
@@ -308,6 +332,10 @@ gaf_find() {
             printf "$b\t$f\n"
         done
     done
+}
+
+gaf__commands() {
+    cat $0 | grep '^## ' | cut -c4-
 }
 
 # ----------------------------------------------------------------------
