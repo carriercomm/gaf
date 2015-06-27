@@ -22,7 +22,8 @@ repo between different users/machines (don't forget to clone it as `~/.gaf`!)
 is upto you.  I assume you have a working knowledge of git and know how to do
 that.
 
-Each branch in the gaf repo is a **feature**.  For example, you might have
+Each **branch** in the gaf repo is a **feature** (we use the two words
+inter-changeably).  For example, you might have
 features "vim", "bash", "zsh", "devel", "mail", etc., and different
 users/machines may use different subsets of these features, even though the
 repo itself carries all of them.  The features used by any user are listed in
@@ -94,7 +95,12 @@ Here is the complete list, with sample usages where appropriate.
 
     <font color="red">**WARNING**</font>: `gaf save` does not deal with
     deleted files.  You will have to "cd" to the gaf repo directory and fix it
-    yourself.  This may change later, if people ask!
+    yourself.  Worse, if you make changes on some other machine and run `gaf
+    save` to propagate the change back, *the files you deleted might come
+    back!*  This has proven kinda hard to automate without bloating the code
+    too much; maybe someone smarter than me will figure out an easier way :)
+    At present I fix this up manually because such deletions happen very
+    rarely.
 
     Any branch you save is added to the feature list.
 
@@ -115,16 +121,17 @@ Here is the complete list, with sample usages where appropriate.
     directory to see what files would get written.
 
 *   **`gaf cycle`** -- does one complete cycle of a typical commit-then-merge
-    development loop.  For each branch in the feature list, it runs:
+    development loop.  It first "fetches" from the remote(s), then, for each
+    branch in the feature list, it runs:
 
-    *   `gaf save <branch>` to save your local changes
-    *   `gaf pull` to fetch and merge changes from the central server
+    *   `gaf save <branch>` to commit your local changes
+    *   `gaf rebase` on top of the remote tracking branch
     *   `gaf restore <branch>` to copy the (merged) files to your current
         directory
 
-    **`gaf pull` may fail** due to merge conflicts, in which case the entire
+    **`gaf rebase` may fail** due to merge conflicts, in which case the entire
     'cycle' operation will abort; you should "cd" to the gaf repo, fix the
-    conflict, commit, and then rerun the `gaf cycle` command.
+    conflict, complete the rebase, and then rerun the `gaf cycle` command.
 
     **WARNING**: cycle won't run if you're not in your $HOME.  At present
     there's no getting around this; ask me if you need to.
@@ -146,7 +153,7 @@ Here is the complete list, with sample usages where appropriate.
         each branch in turn!
 
     *   `gaf diff <pattern> [<diff options>]`: runs a full diff for each
-        feature that matches the pattern give.  You can append whatever
+        feature that matches the pattern given.  You can append whatever
         options you like; the default is nothing so you get a plain `git
         diff`.
 
