@@ -46,7 +46,8 @@ urls_clone_pull() {
     fi
 }
 
-GAF_PLUGIN_HELP="${GAF_PLUGIN_HELP}Save and restore git URLs instead of actual code; useful for all those vim
+GAF_PLUGIN_HELP="${GAF_PLUGIN_HELP}gaf-urls.plugin:
+Save and restore git URLs instead of actual code; useful for all those vim
 plugins in ~/.vim/bundle, and so on:
 
     gaf urlsave <branch> <git repos>

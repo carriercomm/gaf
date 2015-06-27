@@ -310,11 +310,11 @@ gaf_help() {
     cat <<EOF
 gaf -- gitify arbitrary files
 
-Run "gaf _commands" or use zsh completion to get help.  See
-http://gitolite.com/gaf for more features and details.
+Run "gaf _commands" or use zsh completion to get help.  See README.mkd for
+details (easiest to view it at http://github.com/sitaramc/gaf).
 
 EOF
-echo -n "$GAF_PLUGIN_HELP"
+# echo -n "$GAF_PLUGIN_HELP"    <-- plugin help disabled for now
     exit 1
 }
 
